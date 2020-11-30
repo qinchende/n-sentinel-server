@@ -1,0 +1,32 @@
+{
+  "_from": "n-sentinel-server",
+  "_id": "n-sentinel-server@0.1.0",
+  "_inBundle": false,
+  "_phantomChildren": {},
+  "_requested": {
+  },
+  "_requiredBy": [],
+  "author": {
+    "name": "闪电侠",
+    "email": "qinchende@qq.com"
+  },
+  "contributors": [],
+  "dependencies": {
+  },
+  "deprecated": false,
+  "description": "Server for n-sentinel tool.",
+  "devDependencies": {
+  },
+  "engines": {
+    "node": ">=8"
+  },
+  "homepage": "https://www.chende.ren/",
+  "keywords": [
+  ],
+  "license": "MIT",
+  "main": "app.js",
+  "name": "n-sentinel-server",
+  "scripts": {
+  },
+  "version": "0.1.0"
+}
