@@ -29,7 +29,7 @@ let me = {
         let ip = (req.pms['ip'] || '').toLowerCase();
         let group = req.pms['group'] || '';
         let name = req.pms['name'] || '';
-        if (!ip || !group || !name) { return Gd.fai('信息不全。'); }
+        if (!ip || !group || !name) { return Gd.fai(res, '信息不全。'); }
 
         W32501.hset(Cst.fix.n_snt_servers, ip, JSON.stringify([group, name, 0]), Gd.render(res));
     },
@@ -112,16 +112,11 @@ let me = {
 
     curServers: function(req, res) {
         let ret = {pg: 1, pgSize: 1000, records: []};
-
         W32501.hgetall(Cst.fix.n_snt_servers, function(err, pcs) {
             let ips = Gd.getKeys(pcs);
-            let ct = 0;
-            Asy.whilst(
-                function () { return ct < ips.length; },
-                function (cb) {
-                    let ip = ips[ct++];
+            async function eachServer(ip) {
+                return new Promise(resolve => {
                     let arr = pcs[ip];
-
                     let record = {ip: ip};
                     arr = JSON.parse(arr || '[]');
                     record['group'] = arr[0];
@@ -131,17 +126,20 @@ let me = {
                     W32501.hgetall(Cst.fix.n_snt_cur + ip, function(err, val) {
                         Gd.apply(record, me.genOneRecord(val));
                         ret.records.push(record);
-                        cb();
+                        resolve();
                     });
-                },
-                function() {
-                    // 对 ret.records 排序
-                    ret.records.sort(function(a, b) {
-                        return (a.group+a.name+a.ip < b.group+b.name+b.ip) ? -1 : 1;
-                    });
-                    Gd.suc(res, ret);
+                });
+            }
+            (async function () {
+                for (let ct = 0; ct < ips.length; ct++) {
+                    await eachServer(ips[ct])
                 }
-            );
+                // 对 ret.records 排序
+                ret.records.sort(function(a, b) {
+                    return (a.group+a.name+a.ip < b.group+b.name+b.ip) ? -1 : 1;
+                });
+                Gd.suc(res, ret);
+            })();
         });
     },
     genOneRecord: function(v) {

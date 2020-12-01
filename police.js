@@ -9,9 +9,9 @@ module.exports = function(fty) {
     });
 
     // 请求已正确进入路由
-    fty.addHook('onRequest', (reqF, resF, next) => {
-        next();
-    });
+    // fty.addHook('onRequest', (reqF, resF, next) => {
+    //     next();
+    // });
 
     // 请求通过验证，处理之前
     fty.addHook('preHandler', (reqF, resF, next) => {
