@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="40b81a1f-2037-4b24-bb3c-612dfee2970e" name="Default Changelist" comment="" />
+    <list default="true" id="40b81a1f-2037-4b24-bb3c-612dfee2970e" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/node_modules/fastify-guarder/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/fastify-guarder/README.md" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -56,7 +58,7 @@
       <option name="presentableId" value="Default" />
       <updated>1606728044738</updated>
       <workItem from="1606728045804" duration="1532000" />
-      <workItem from="1606791972213" duration="1453000" />
+      <workItem from="1606791972213" duration="2192000" />
     </task>
     <servers />
   </component>
