@@ -19,20 +19,6 @@ module.exports = function(fty) {
     });
 
     fty.addHook('preHandler', (reqF, resF, next) => {
-        // // 特殊API调用会留下特殊参数，比如（APP，微信）
-        // if (!req.pms['__cm_from'] && req.path !== '/r_server_time' && !Utl.isReqFromAPP(req)) {
-        //     var jpc     = req.pms['jpc'];
-        //     var _stamp  = req.pms['_stamp'];
-        //
-        //     if (_stamp && jpc && jpc.length >= 10) {
-        //         var _stamp_init = parseInt(req.pms['_stamp_init'] || '0');
-        //
-        //         // 请求到达服务器时间不能超过15秒（网络延时时间）
-        //         if (_stamp_init !== 1 && Math.abs(Date.diff(Gd.Server.getTM(), _stamp)) > 15000) {
-        //             return res.send('(∩_∩)');
-        //         }
-        //     } else { return res.send('(∩_∩)'); }
-        // }
 
         Gd.Ses.sesToken(reqF, resF, next, Gd.isNeedLogin);
     });

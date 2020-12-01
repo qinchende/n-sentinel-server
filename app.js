@@ -10,7 +10,7 @@ const Gd = require('fastify-guarder')({
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 const Cst = Gd.global('Cst', require('./config/const'));
 const Env = Gd.global('Env', require('./config/env'));
-const appCnf = require('./config/env').app_config;
+const appCnf = Env.app_env;
 const ServerMate = Gd.global('ServerMate', {
     env: 'product',
     port: appCnf.port,
