@@ -10,17 +10,23 @@
     "name": "闪电侠",
     "email": "qinchende@qq.com"
   },
-  "contributors": [],
+  "contributors": [{
+    "name": "闪电侠",
+    "url": "http://chende.ren"
+  }],
   "dependencies": {
+    "fastify": "^3.3.0",
+    "fastify-formbody": "^5.0.0",
+    "fastify-plugin": "^2.3.4"
   },
   "deprecated": false,
-  "description": "Server for n-sentinel tool.",
+  "description": "Server for n-sentinel tool kit.",
   "devDependencies": {
   },
   "engines": {
     "node": ">=8"
   },
-  "homepage": "https://www.chende.ren/",
+  "homepage": "http://chende.ren",
   "keywords": [
   ],
   "license": "MIT",

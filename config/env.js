@@ -13,6 +13,7 @@ exports.fix = {
 
 // 发送短信的通道
 exports.smsCnf = {
+    enable: false,
     adminPhone: '13800138000',
     host: 'http://xx.xx.xx.xx:10230/get_sms',
     access_key: '48ysc30b9dfmx9a316871d04e6b2d2fd22576axx'

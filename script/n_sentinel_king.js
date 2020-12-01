@@ -4,7 +4,7 @@ const Cst = Gd.global('Cst', require('../config/const'));
 const Env = Gd.global('Env', require('../config/env'));
 
 require('../config/redis')('king');
-// require('../config/sms_vender')('king');
+require('../config/sms_vender')('king');
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 let LogType = { error: 'error', warn: 'warn' };
 let URL_LAN = "http://{{0}}:49119/all?access_key=" + Gd.getSha1(Env.fix.myIP_LAN, Env.fix.secret);
@@ -214,20 +214,14 @@ function caleNetGroup() {
         ret['134'][last9Min] = [0, 0, 0, 0];
 
         let ips = Gd.getKeys(servers);
-        let ct = 0;
-
-        for (let i = 0; i < ips.length; i++) {
-
-        }
-        Asy.whilst(
-            function () { return ct < ips.length; },
-            function (cb) {
-                let ip = ips[ct++];
+        function eachServer(ip) {
+            return new Promise(resolve => {
                 let val = servers[ip];
                 val = JSON.parse(val || '[]');
 
                 let group = val[0];
-                if (group !== '133' && group !== '134') { return cb(); }
+                // 目前是写死的只支持两个分组，分组名称必须是 133 和 134 否则统计不到分组数据
+                if (group !== '133' && group !== '134') return resolve();
 
                 let pcAnaNet = Cst.fix.n_snt_ana_net + ip;
                 W32501.zrangebyscore(pcAnaNet, last9Min, '9901010000', function(err, nets) {
@@ -240,74 +234,69 @@ function caleNetGroup() {
                     if (net2[0] === last2Min) { cc = ret[group][last2Min]; cc[0] += net2[1][0]; cc[1] += net2[1][1]; }
                     if (net1[0] === last1Min) { cc = ret[group][last1Min]; cc[0] += net1[1][0]; cc[1] += net1[1][1]; }
 
-                    cb();
+                    resolve();
                 });
-            },
-            function() {
-                let group133 = Cst.fix.n_snt_ana_net_group + '133';
-                let group134 = Cst.fix.n_snt_ana_net_group + '134';
+            });
+        }
 
-                let arr133Last1 = eachFixed2(ret['133'][last1Min]);
-                let arr133Last2 = eachFixed2(ret['133'][last2Min]);
-                let arr133Last9 = eachFixed2(ret['133'][last9Min]);
+        function groupAnalyse() {
+            let group133 = Cst.fix.n_snt_ana_net_group + '133';
+            let group134 = Cst.fix.n_snt_ana_net_group + '134';
 
-                let arr134Last1 = eachFixed2(ret['134'][last1Min]);
-                let arr134Last2 = eachFixed2(ret['134'][last2Min]);
-                let arr134Last9 = eachFixed2(ret['134'][last9Min]);
+            let arr133Last1 = eachFixed2(ret['133'][last1Min]);
+            let arr133Last2 = eachFixed2(ret['133'][last2Min]);
+            let arr133Last9 = eachFixed2(ret['133'][last9Min]);
 
-                W32501.multi()
-                    .zremrangebyscore(group133, last1Min, last1Min)
-                    .zadd(group133, last1Min, JSON.stringify([last1Min, arr133Last1]))
-                    .zremrangebyscore(group133, last2Min, last2Min)
-                    .zadd(group133, last2Min, JSON.stringify([last2Min, arr133Last2]))
-                    .zremrangebyscore(group133, last9Min, last9Min)
-                    .zadd(group133, last9Min, JSON.stringify([last9Min, arr133Last9]))
+            let arr134Last1 = eachFixed2(ret['134'][last1Min]);
+            let arr134Last2 = eachFixed2(ret['134'][last2Min]);
+            let arr134Last9 = eachFixed2(ret['134'][last9Min]);
 
-                    .zremrangebyscore(group134, last1Min, last1Min)
-                    .zadd(group134, last1Min, JSON.stringify([last1Min, arr134Last1]))
-                    .zremrangebyscore(group134, last2Min, last2Min)
-                    .zadd(group134, last2Min, JSON.stringify([last2Min, arr134Last2]))
-                    .zremrangebyscore(group134, last9Min, last9Min)
-                    .zadd(group134, last9Min, JSON.stringify([last9Min, arr134Last9]))
+            W32501.multi()
+                .zremrangebyscore(group133, last1Min, last1Min)
+                .zadd(group133, last1Min, JSON.stringify([last1Min, arr133Last1]))
+                .zremrangebyscore(group133, last2Min, last2Min)
+                .zadd(group133, last2Min, JSON.stringify([last2Min, arr133Last2]))
+                .zremrangebyscore(group133, last9Min, last9Min)
+                .zadd(group133, last9Min, JSON.stringify([last9Min, arr133Last9]))
 
-                    .exec(function(err2, rets2) {
-                        Log.log('Net group cale finished.');
-                    });
+                .zremrangebyscore(group134, last1Min, last1Min)
+                .zadd(group134, last1Min, JSON.stringify([last1Min, arr134Last1]))
+                .zremrangebyscore(group134, last2Min, last2Min)
+                .zadd(group134, last2Min, JSON.stringify([last2Min, arr134Last2]))
+                .zremrangebyscore(group134, last9Min, last9Min)
+                .zadd(group134, last9Min, JSON.stringify([last9Min, arr134Last9]))
 
-                // // add by chende.ren on 20200401
-                // // ++++++++++++++++++++++++++++++++++++++++++++++++++++
-                // // 通知业务数据库，当前网络利用情况。
-                // let groupAll = Cst.fix.n_snt_ana_net_group + 'all';
-                // W41502.multi()
-                //     .zremrangebyscore(groupAll, last1Min, last1Min)
-                //     .zadd(groupAll, last1Min, JSON.stringify({time: last1Min, 133: arr133Last1, 134: arr134Last1}))
-                //     .zremrangebyscore(groupAll, last2Min, last2Min)
-                //     .zadd(groupAll, last2Min, JSON.stringify({time: last2Min, 133: arr133Last2, 134: arr134Last2}))
-                //     .exec(function(err3, ret3) {
-                //         Log.log('Send data to 41502 finished.');
-                //     });
-                // // ++++++++++++++++++++++++++++++++++++++++++++++++++++
+                .exec(function(err2, rets2) {
+                    Log.log('Net group cale finished.');
+                });
 
-                // add by chende.ren on 20200717
-                // ++++++++++++++++++++++++++++++++++++++++++++++++++++
-                // 如果带宽使用超过 40Mb/50Mb 就要触发短信提醒管理员
-                let wanRX133 = (arr133Last1[0] + arr133Last2[0]) / 2;
-                let wanTX133 = (arr133Last1[1] + arr133Last2[1]) / 2;
-                Log.log(`WanRX133: ${wanRX133.toFixed(2)}, WanTX133: ${wanTX133.toFixed(2)}`);
+            // add by chende.ren on 20200717
+            // ++++++++++++++++++++++++++++++++++++++++++++++++++++
+            // 只统计133端的阈值
+            // 如果带宽使用超过 40Mb/50Mb 就要触发短信提醒管理员
+            let wanRX133 = (arr133Last1[0] + arr133Last2[0]) / 2;
+            let wanTX133 = (arr133Last1[1] + arr133Last2[1]) / 2;
+            Log.log(`WanRX133: ${wanRX133.toFixed(2)}, WanTX133: ${wanTX133.toFixed(2)}`);
 
-                if (wanRX133 > 43.5 || wanTX133 > 43.5) {
-                    let flagKey = Cst.fix.n_snt_sms_notice_flag + '133WanWarn';
-                    W32501.get(flagKey, function(err, ret) {
-                        if (ret) return;
-                        // 发短信，30分钟发一条短信
-                        let message = `[${wanRX133.toFixed(2)},${wanTX133.toFixed(2)}]`;
-                        W32501.setex(flagKey, 1800, message);
-                        sendAdminNotice('133Wan', message);
-                    });
-                }
-                // ++++++++++++++++++++++++++++++++++++++++++++++++++++
+            if (wanRX133 > 43.5 || wanTX133 > 43.5) {
+                let flagKey = Cst.fix.n_snt_sms_notice_flag + '133WanWarn';
+                W32501.get(flagKey, function(err, ret) {
+                    if (ret) return;
+                    // 发短信，30分钟发一条短信
+                    let message = `[${wanRX133.toFixed(2)},${wanTX133.toFixed(2)}]`;
+                    W32501.setex(flagKey, 1800, message);
+                    sendAdminNotice('133Wan', message);
+                });
             }
-        );
+            // TODO: 可以通知业务系统，后续输出的资源路径指向CDN代理域名
+        }
+
+        (async function() {
+            for (let ct = 0; ct < ips.length; ct++) {
+                await eachServer(ips[ct]);
+            }
+            groupAnalyse();
+        })()
     });
 }
 
@@ -364,6 +353,6 @@ function addPcEvent(ip, type, value) {
 
 // 给管理员发送通知短信
 function sendAdminNotice(name, code) {
-    if (!SmsVender) return;
+    if (!SmsVender || smsCnf.enable === false) return;
     SmsVender.adminNotice(Env.smsCnf.adminPhone, name, code);
 }

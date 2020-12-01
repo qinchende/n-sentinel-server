@@ -1,25 +1,20 @@
 module.exports = function(fty) {
     fty.addHook('onReady', (next) => {
         Gd.Ses.tokenInit({
-            redisCnf:               {redis: S44301},
-
-            project_key:            'fds_user_reg',
+            redisCnf:               {redis: S32500},
+            project_key:            'n-sentinel-server',
             checkTokenIP:           false,
-
-            secs_ip_count:          100,                // IP token 生成频率
-            secs_access_count:      900,                // 每个 token 访问次数
-            secs_expire:            300,                // 统计周期    (秒) 5分钟
-            secs_lock:              3600*6              // 限制锁定时长 (秒)
         });
         next();
     });
 
+    // 请求已正确进入路由
     fty.addHook('onRequest', (reqF, resF, next) => {
         next();
     });
 
+    // 请求通过验证，处理之前
     fty.addHook('preHandler', (reqF, resF, next) => {
-
         Gd.Ses.sesToken(reqF, resF, next, Gd.isNeedLogin);
     });
 };

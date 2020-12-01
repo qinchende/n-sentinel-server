@@ -4,7 +4,7 @@ const fty = require('fastify')({
     ignoreTrailingSlash: false,
 });
 const Gd = require('fastify-guarder')({
-    proxy: { host: '10.10.10.10', port: 8180 }
+    // proxy: { host: '10.10.10.10', port: 8180 }
 });
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
