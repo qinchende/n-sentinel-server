@@ -29,23 +29,23 @@ var me = C.Watch = C.define('watch', {
         var name = req.pms['name'] || '';
         if (!ip || !group || !name) { return Utl.fai('信息不全。'); }
 
-        W32501.hset(Cst.fix.tl_snt_servers, ip, JSON.stringify([group, name, 0]), Utl.render(res));
+        W32501.hset(Cst.fix.n_snt_servers, ip, JSON.stringify([group, name, 0]), Utl.render(res));
     },
 
     freezeServer: function(req, res) {
         var ip = (req.pms['id'] || '').trim().toLowerCase();
-        W32501.hget(Cst.fix.tl_snt_servers, ip, function(err, ret) {
+        W32501.hget(Cst.fix.n_snt_servers, ip, function(err, ret) {
             ret = JSON.parse(ret || '[]');
             if (ret[2] === 1) { ret[2] = 0; }
             else { ret[2] = 1; }
 
-            W32501.hset(Cst.fix.tl_snt_servers, ip, JSON.stringify(ret), Utl.render(res));
+            W32501.hset(Cst.fix.n_snt_servers, ip, JSON.stringify(ret), Utl.render(res));
         });
     },
 
     deleteServer: function(req, res) {
         var ip = (req.pms['ip'] || '').trim().toLowerCase();
-        var keys = "tl_snt_*{{0}}*".format([ip]);
+        var keys = "n_snt_*{{0}}*".format([ip]);
         W32501.keys(keys, function(err, rets) {
             Utl.forEach(rets, function(idx, key) {
                 W32501.del(key);
@@ -53,21 +53,21 @@ var me = C.Watch = C.define('watch', {
             if (req.pms['just_history']) {
                 Utl.suc(res);
             } else {
-                W32501.hdel(Cst.fix.tl_snt_servers, ip, Utl.render(res));
+                W32501.hdel(Cst.fix.n_snt_servers, ip, Utl.render(res));
             }
         });
     },
 
     closeErrors: function(req, res) {
         var ip = (req.pms['ip'] || '').trim().toLowerCase();
-        W32501.hset(Cst.fix.tl_snt_cur + ip, 'warn', 0, function(err, ret) {
-            W32501.hset(Cst.fix.tl_snt_cur + ip, 'error', 0, Utl.render(res));
+        W32501.hset(Cst.fix.n_snt_cur + ip, 'warn', 0, function(err, ret) {
+            W32501.hset(Cst.fix.n_snt_cur + ip, 'error', 0, Utl.render(res));
         });
     },
 
     clearErrors: function(req, res) {
         var ip = (req.pms['ip'] || '').trim().toLowerCase();
-        W32501.del(Cst.fix.tl_snt_err_log + ip, Utl.render(res));
+        W32501.del(Cst.fix.n_snt_err_log + ip, Utl.render(res));
     },
     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     getHistory: function(req, res) {
@@ -76,7 +76,7 @@ var me = C.Watch = C.define('watch', {
         var days = parseFloat(req.pms['days']) || 1;
         var start = new Date().dayAdd(-days).format('yyMMddhhmm');
 
-        var dKey = Cst.fix['tl_snt_ana_' + type] + ip;
+        var dKey = Cst.fix['n_snt_ana_' + type] + ip;
         W32501.zrangebyscore(dKey, start, '9901010000', function(err, ret) {
             Utl.renderRedis(res, err, ret);
         });
@@ -86,10 +86,10 @@ var me = C.Watch = C.define('watch', {
         var start = new Date().dayAdd(-days).format('yyMMddhhmm');
 
         var ret = {'133': [], '134': []};
-        W32501.zrangebyscore(Cst.fix.tl_snt_ana_net_group + '133', start, '9901010000', function(err1, re133) {
+        W32501.zrangebyscore(Cst.fix.n_snt_ana_net_group + '133', start, '9901010000', function(err1, re133) {
             ret['133'] = re133;
 
-            W32501.zrangebyscore(Cst.fix.tl_snt_ana_net_group + '134', start, '9901010000', function(err2, re134) {
+            W32501.zrangebyscore(Cst.fix.n_snt_ana_net_group + '134', start, '9901010000', function(err2, re134) {
                 ret['134'] = re134;
                 Utl.renderRedis(res, err2, ret);
             });
@@ -99,7 +99,7 @@ var me = C.Watch = C.define('watch', {
     getErrLogs: function(req, res) {
         var ip = (req.pms['ip'] || '').trim().toLowerCase();
 
-        W32501.zrevrange(Cst.fix.tl_snt_err_log + ip, 0, 500, function(err, re) {
+        W32501.zrevrange(Cst.fix.n_snt_err_log + ip, 0, 500, function(err, re) {
             var ret = {pg: 1, pgSize: 500, records: []};
             Utl.forEach(re, function(idx, item) {
                 ret.records.push({ip: ip, msg: item });
@@ -111,7 +111,7 @@ var me = C.Watch = C.define('watch', {
     curServers: function(req, res) {
         var ret = {pg: 1, pgSize: 1000, records: []};
 
-        W32501.hgetall(Cst.fix.tl_snt_servers, function(err, pcs) {
+        W32501.hgetall(Cst.fix.n_snt_servers, function(err, pcs) {
             var ips = Utl.getKeys(pcs);
             var ct = 0;
             Asy.whilst(
@@ -126,7 +126,7 @@ var me = C.Watch = C.define('watch', {
                     record['name'] = arr[1];
                     record['status'] = arr[2];
 
-                    W32501.hgetall(Cst.fix.tl_snt_cur + ip, function(err, val) {
+                    W32501.hgetall(Cst.fix.n_snt_cur + ip, function(err, val) {
                         Utl.apply(record, me.genOneRecord(val));
                         ret.records.push(record);
                         cb();

@@ -1,6 +1,6 @@
 require('../node_lib/tl');
-var Cst = TL.global('Cst', require('../config/const'));
-var Env = TL.global('Env', require('../config/env'));
+var Cst = Gd.global('Cst', require('../config/const'));
+var Env = Gd.global('Env', require('../config/env'));
 
 require('../config/redis')('king');
 require('../node_lib/conn/sms')(Env.sms_config);
@@ -28,7 +28,7 @@ function loop() {
 setTimeout(loop, 10*1000);
 
 function checkEachServer() {
-    W32501.hgetall(Cst.fix.tl_snt_servers, function(err, servers) {
+    W32501.hgetall(Cst.fix.n_snt_servers, function(err, servers) {
         Utl.forEach(servers, function(ip, val) {
             if (ip.indexOf('.') <= 0) { return; }
             val = JSON.parse(val || '[]');
@@ -92,11 +92,11 @@ function save_cur_info(ip, ret) {
     var now         = new Date();
     var timeScore   = parseInt(now.format('yyMMddhhmm'));
 
-    var pcKey       = Cst.fix.tl_snt_cur + ip;
-    var pcAnaCpu    = Cst.fix.tl_snt_ana_cpu + ip;
-    var pcAnaMem    = Cst.fix.tl_snt_ana_mem + ip;
-    var pcAnaDsk    = Cst.fix.tl_snt_ana_dsk + ip;
-    var pcAnaNet    = Cst.fix.tl_snt_ana_net + ip;
+    var pcKey       = Cst.fix.n_snt_cur + ip;
+    var pcAnaCpu    = Cst.fix.n_snt_ana_cpu + ip;
+    var pcAnaMem    = Cst.fix.n_snt_ana_mem + ip;
+    var pcAnaDsk    = Cst.fix.n_snt_ana_dsk + ip;
+    var pcAnaNet    = Cst.fix.n_snt_ana_net + ip;
 
     if (ret.stamp) {
         W32501.hset(pcKey, 'stamp', JSON.stringify(ret.stamp));
@@ -173,9 +173,9 @@ function save_cur_info(ip, ret) {
 
         // +++++++++++++++++++++++++++++++++++++++
         // 删除网络汇总数据
-        var group133 = Cst.fix.tl_snt_ana_net_group + '133';
-        var group134 = Cst.fix.tl_snt_ana_net_group + '134';
-        var groupAll = Cst.fix.tl_snt_ana_net_group + 'all';
+        var group133 = Cst.fix.n_snt_ana_net_group + '133';
+        var group134 = Cst.fix.n_snt_ana_net_group + '134';
+        var groupAll = Cst.fix.n_snt_ana_net_group + 'all';
         W32501.zremrangebyscore(group133, 0, score);
         W32501.zremrangebyscore(group134, 0, score);
         W41502.zremrangebyscore(groupAll, 0, score);
@@ -186,7 +186,7 @@ function save_cur_info(ip, ret) {
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // 前一分钟网段统计
 function caleNetGroup() {
-    W32501.hgetall(Cst.fix.tl_snt_servers, function(err, servers) {
+    W32501.hgetall(Cst.fix.n_snt_servers, function(err, servers) {
         var now = new Date();
         var last1Min = parseInt(new Date(now -   60*1000).format('yyMMddhhmm'));
         var last2Min = parseInt(new Date(now - 2*60*1000).format('yyMMddhhmm'));
@@ -212,7 +212,7 @@ function caleNetGroup() {
                 var group = val[0];
                 if (group !== '133' && group !== '134') { return cb(); }
 
-                var pcAnaNet = Cst.fix.tl_snt_ana_net + ip;
+                var pcAnaNet = Cst.fix.n_snt_ana_net + ip;
                 W32501.zrangebyscore(pcAnaNet, last9Min, '9901010000', function(err, nets) {
                     var net9 = JSON.parse(nets[0] || '[]');
                     var net2 = JSON.parse(nets[7] || '[]');
@@ -227,8 +227,8 @@ function caleNetGroup() {
                 });
             },
             function() {
-                var group133 = Cst.fix.tl_snt_ana_net_group + '133';
-                var group134 = Cst.fix.tl_snt_ana_net_group + '134';
+                var group133 = Cst.fix.n_snt_ana_net_group + '133';
+                var group134 = Cst.fix.n_snt_ana_net_group + '134';
 
                 var arr133Last1 = eachFixed2(ret['133'][last1Min]);
                 var arr133Last2 = eachFixed2(ret['133'][last2Min]);
@@ -260,7 +260,7 @@ function caleNetGroup() {
                 // add by cd.net on 20200401
                 // ++++++++++++++++++++++++++++++++++++++++++++++++++++
                 // 通知业务数据库，当前网络利用情况。
-                var groupAll = Cst.fix.tl_snt_ana_net_group + 'all';
+                var groupAll = Cst.fix.n_snt_ana_net_group + 'all';
                 W41502.multi()
                     .zremrangebyscore(groupAll, last1Min, last1Min)
                     .zadd(groupAll, last1Min, JSON.stringify({time: last1Min, 133: arr133Last1, 134: arr134Last1}))
@@ -279,7 +279,7 @@ function caleNetGroup() {
                 Log.log(`WanRX133: ${wanRX133.toFixed(2)}, WanTX133: ${wanTX133.toFixed(2)}`);
 
                 if (wanRX133 > 43.5 || wanTX133 > 43.5) {
-                    var flagKey = Cst.fix.tl_snt_sms_notice_flag + '133WanWarn';
+                    var flagKey = Cst.fix.n_snt_sms_notice_flag + '133WanWarn';
                     W32501.get(flagKey, function(err, ret) {
                         if (ret) return;
                         // 发短信，30分钟发一条短信
@@ -308,13 +308,13 @@ function eachFixed2(arr) {
 }
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 function addPcEvent(ip, type, value) {
-    var pcKey   = Cst.fix.tl_snt_cur + ip;
+    var pcKey   = Cst.fix.n_snt_cur + ip;
     W32501.hincrby(pcKey, type, 1);
 
     // 记录错误日志
     var Last = Pcs[ip];
     if (!Last.event || JSON.stringify(Last.event[2]) !== JSON.stringify(value) || Last.eventCt >= 9) {
-        var logKey = Cst.fix.tl_snt_err_log + ip;
+        var logKey = Cst.fix.n_snt_err_log + ip;
         var curVal = [new Date().format(), type, value];
         W32501.zadd(logKey, Number(new Date(curVal[0])), JSON.stringify(curVal));
         if (Last.eventCt > 0 && Last.eventCt < 9) {
@@ -329,7 +329,7 @@ function addPcEvent(ip, type, value) {
 
     // 需要检查发短信，通知管理员
     if (type == LogType.error) {
-        var flagKey = Cst.fix.tl_snt_sms_notice_flag + ip;
+        var flagKey = Cst.fix.n_snt_sms_notice_flag + ip;
         W32501.get(flagKey, function(err, ret) {
             if (ret) { return; }
 

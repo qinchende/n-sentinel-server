@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="40b81a1f-2037-4b24-bb3c-612dfee2970e" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1l0JOf5uj0uCFrFMEQvlCbDGHYy" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Remove" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
+    <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="SvnConfiguration" cleanupOnStartRun="true">
+    <configuration>C:\Users\Administrator\AppData\Roaming\Subversion</configuration>
+    <supportedVersion>125</supportedVersion>
+  </component>
+  <component name="SvnFileUrlMappingImpl">
+    <option name="myMappingRoots">
+      <list>
+        <SvnCopyRootSimple>
+          <option name="myVcsRoot" value="D:\chende_dev\chende_pri\n-sentinel\n-sentinel-server" />
+          <option name="myCopyRoot" value="D:\chende_dev\chende_pri\n-sentinel\n-sentinel-server" />
+        </SvnCopyRootSimple>
+      </list>
+    </option>
+    <option name="myMoreRealMappingRoots">
+      <list>
+        <SvnCopyRootSimple>
+          <option name="myVcsRoot" value="D:\chende_dev\chende_pri\n-sentinel\n-sentinel-server" />
+          <option name="myCopyRoot" value="D:\chende_dev\chende_pri\n-sentinel\n-sentinel-server" />
+        </SvnCopyRootSimple>
+      </list>
+    </option>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="40b81a1f-2037-4b24-bb3c-612dfee2970e" name="Default Changelist" comment="" />
+      <created>1606728044738</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1606728044738</updated>
+      <workItem from="1606728045804" duration="1532000" />
+      <workItem from="1606791972213" duration="1453000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="461" y="153" key="SettingsEditor" timestamp="1606728063215">
+      <screen x="0" y="0" width="1920" height="1019" />
+    </state>
+    <state x="461" y="153" key="SettingsEditor/1920.0.1440.839/0.0.1920.1019@0.0.1920.1019" timestamp="1606728063215" />
+    <state x="721" y="329" width="598" height="594" key="find.popup" timestamp="1606728872185">
+      <screen x="0" y="0" width="1920" height="1019" />
+    </state>
+    <state x="721" y="329" width="598" height="594" key="find.popup/1920.0.1440.839/0.0.1920.1019@0.0.1920.1019" timestamp="1606728872185" />
+  </component>
+</project>

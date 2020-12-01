@@ -1,37 +1,45 @@
-require('./node_lib/tl');
-var Cst = TL.global('Cst', require('./config/const'));
-var Env = TL.global('Env', require('./config/env'));
+const fty = require('fastify')({
+    logger: false,
+    disableRequestLogging: true,
+    ignoreTrailingSlash: false,
+});
+const Gd = require('fastify-guarder')({
+    proxy: { host: '10.10.10.10', port: 8180 }
+});
 
-var express     = require('express'),
-    app         = express(),
-    bodyParser  = require('body-parser');
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+const Cst = Gd.global('Cst', require('./config/const'));
+const Env = Gd.global('Env', require('./config/env'));
+const appCnf = require('./config/env').app_config;
+const ServerMate = Gd.global('ServerMate', {
+    env: 'product',
+    port: appCnf.port,
+    host: appCnf.host,
+    jsonp_callback_name: 'jpc'
+});
 
-var request     = require('./node_lib/web/request'),
-    police      = require('./police'),
-    server      = require('./config/env').app_env;
-
-app.set('_port', server.port);
-app.set('_host', server.host);
-app.set('env', 'product');
-app.set('jsonp callback name', 'jpc');
-
-app.use(police.check);
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
-
-app.use(request.bodyQuery);
-app.use(request.logger);
-app.use(police.sessionCheck);
-
-if ((process.argv[1] || '').indexOf('/server/') < 0) {
-    app.listen(server.port, server.host, function(){
-        console.log("Express listening on " + server.host + ":" + server.port);
+const scriptPath = (process.argv[1] || '').replace(/\\/gi, '/');
+if (scriptPath.indexOf('/server/') < 0) {
+    fty.listen(appCnf.port, appCnf.host, function (err, address) {
+        if (err) {
+            fty.log.error(err);
+            process.exit(1);
+        }
+        Log.log(`Singleton pid(${process.pid}) listening as ${address}`);
     });
 }
-// *********************************************************************************************************************
-var Router = TL.global('Router', function() { return express.Router; });
+
+// 主要生命周期
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Gd.hookRequestDefault(fty);     // 统一风格，所有项目共享的特性
+require('./police')(fty);       // 每个项目不同的业务逻辑判断
+
+fty.register(require('./routes'), {
+    printRouteTree: true
+});
 
 require('./config/redis')('app');
-require('./routes')(app);
+// require('./config/mysql')('app');
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-module.exports = app;
+module.exports = fty;
