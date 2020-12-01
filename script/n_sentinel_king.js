@@ -7,8 +7,8 @@ require('../config/redis')('king');
 // require('../config/sms_vender')('king');
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 let LogType = { error: 'error', warn: 'warn' };
-let url_lan = "http://{{0}}:49119/all?access_key=" + Gd.getSha1(Env.fix.myIP_LAN, Env.fix.secret);
-let url_wan = "http://{{0}}:49119/all?access_key=" + Gd.getSha1(Env.fix.myIP_WAN, Env.fix.secret);
+let URL_LAN = "http://{{0}}:49119/all?access_key=" + Gd.getSha1(Env.fix.myIP_LAN, Env.fix.secret);
+let URL_WAN = "http://{{0}}:49119/all?access_key=" + Gd.getSha1(Env.fix.myIP_WAN, Env.fix.secret);
 
 let TIMEOUT_STEP;
 function loop() {
@@ -16,7 +16,7 @@ function loop() {
     // 检查每台服务器
     checkEachServer();
     // 汇总各网段带宽
-    // caleNetGroup();
+    caleNetGroup();
 
     let now = new Date();
     if (now.getSeconds() > 50) {
@@ -35,19 +35,28 @@ function checkEachServer() {
             val = JSON.parse(val || '[]');
             if (val[2] !== 0) { return; }
 
-            // 内网直接请求
-            if (/^(10.)|(192.)|(172.)/.test(ip)) {
+            let isLanIP = /^(10.)|(192.)|(172.)/.test(ip);
+            let reqUrl;
+            if (isLanIP) {
+                reqUrl = URL_LAN.format([ip]);
+            } else {
+                reqUrl = URL_WAN.format([ip]);
+            }
+
+            // 没有代理，或者内网情况。直接请求
+            if (!Env.fix.agent || isLanIP) {
                 return Gd.webReqJson({
-                    url: url_lan.format([ip]),
+                    url: reqUrl,
                     cb: function(err, ret) {
                         parse_server_status(err, ret, ip);
                     }
                 });
             }
-            // 外网用代理
+
+            // 外网用代理 -> 代理是用 nginx 或者 squid 部署的服务器地址
             Gd.webAgentJson({
                 agent: Env.fix.agent,
-                url: url_wan.format([ip]),
+                url: reqUrl,
                 cb: function(err, ret) {
                     parse_server_status(err, ret, ip);
                 }
@@ -176,10 +185,10 @@ function save_cur_info(ip, ret) {
         // 删除网络汇总数据
         let group133 = Cst.fix.n_snt_ana_net_group + '133';
         let group134 = Cst.fix.n_snt_ana_net_group + '134';
-        let groupAll = Cst.fix.n_snt_ana_net_group + 'all';
+        // let groupAll = Cst.fix.n_snt_ana_net_group + 'all';
         W32501.zremrangebyscore(group133, 0, score);
         W32501.zremrangebyscore(group134, 0, score);
-        W41502.zremrangebyscore(groupAll, 0, score);
+        // W41502.zremrangebyscore(groupAll, 0, score);
         // +++++++++++++++++++++++++++++++++++++++
     }
 
@@ -187,6 +196,8 @@ function save_cur_info(ip, ret) {
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // 前一分钟网段统计
+// 这个汇总是写死的，只统计了，133和134网段，
+// TODO： 有分组统计需求请将分组写成 133 或 134
 function caleNetGroup() {
     W32501.hgetall(Cst.fix.n_snt_servers, function(err, servers) {
         let now = new Date();
@@ -204,6 +215,10 @@ function caleNetGroup() {
 
         let ips = Gd.getKeys(servers);
         let ct = 0;
+
+        for (let i = 0; i < ips.length; i++) {
+
+        }
         Asy.whilst(
             function () { return ct < ips.length; },
             function (cb) {
@@ -259,21 +274,21 @@ function caleNetGroup() {
                         Log.log('Net group cale finished.');
                     });
 
-                // add by cd.net on 20200401
-                // ++++++++++++++++++++++++++++++++++++++++++++++++++++
-                // 通知业务数据库，当前网络利用情况。
-                let groupAll = Cst.fix.n_snt_ana_net_group + 'all';
-                W41502.multi()
-                    .zremrangebyscore(groupAll, last1Min, last1Min)
-                    .zadd(groupAll, last1Min, JSON.stringify({time: last1Min, 133: arr133Last1, 134: arr134Last1}))
-                    .zremrangebyscore(groupAll, last2Min, last2Min)
-                    .zadd(groupAll, last2Min, JSON.stringify({time: last2Min, 133: arr133Last2, 134: arr134Last2}))
-                    .exec(function(err3, ret3) {
-                        Log.log('Send data to 41502 finished.');
-                    });
-                // ++++++++++++++++++++++++++++++++++++++++++++++++++++
+                // // add by chende.ren on 20200401
+                // // ++++++++++++++++++++++++++++++++++++++++++++++++++++
+                // // 通知业务数据库，当前网络利用情况。
+                // let groupAll = Cst.fix.n_snt_ana_net_group + 'all';
+                // W41502.multi()
+                //     .zremrangebyscore(groupAll, last1Min, last1Min)
+                //     .zadd(groupAll, last1Min, JSON.stringify({time: last1Min, 133: arr133Last1, 134: arr134Last1}))
+                //     .zremrangebyscore(groupAll, last2Min, last2Min)
+                //     .zadd(groupAll, last2Min, JSON.stringify({time: last2Min, 133: arr133Last2, 134: arr134Last2}))
+                //     .exec(function(err3, ret3) {
+                //         Log.log('Send data to 41502 finished.');
+                //     });
+                // // ++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-                // add by cd.net on 20200717
+                // add by chende.ren on 20200717
                 // ++++++++++++++++++++++++++++++++++++++++++++++++++++
                 // 如果带宽使用超过 40Mb/50Mb 就要触发短信提醒管理员
                 let wanRX133 = (arr133Last1[0] + arr133Last2[0]) / 2;

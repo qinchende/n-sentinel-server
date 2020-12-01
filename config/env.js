@@ -3,17 +3,18 @@ exports.app_env = {
     port: 9991
 };
 
+// 请修改这些配置文件，符合自己的当前环境
 exports.fix = {
-    myIP_WAN:   'xx.xx.xx.xx',
-    myIP_LAN:   'xx.xx.xx.xx',
+    myIP_WAN:   '221.216.211.238',
+    myIP_LAN:   '192.168.11.11',
     secret:     'n*sentinel*XYz',   // TODO：请修改这个秘钥
-    agent:      'http://xx.xx.xx.xx:8189/agent'
+    // agent:      'http://xx.xx.xx.xx:8189/agent'
 };
 
 // 发送短信的通道
 exports.smsCnf = {
     adminPhone: '13800138000',
-    host: 'http://xx.xx.xx.xx:10230/send_sms',
+    host: 'http://xx.xx.xx.xx:10230/get_sms',
     access_key: '48ysc30b9dfmx9a316871d04e6b2d2fd22576axx'
 };
 

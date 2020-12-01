@@ -9,7 +9,6 @@ module.exports = function(key, o) {
         Gd.global('W32501', init(Env.redis.C32501, 'w'));
 
     } else if (key === 'king') {
-        Gd.global('W32500', init(Env.redis.C32500, 'w'));
         Gd.global('W32501', init(Env.redis.C32501, 'w'));
     }
 };
